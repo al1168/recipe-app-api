@@ -49,7 +49,7 @@ class PublicUseraApiTests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         self.assertEqual(res2.status_code, status.HTTP_400_BAD_REQUEST)
-        
+
     def test_password_too_short_error(self):
         """Test an error if password is less than 5 chars."""
         payload = {
@@ -66,7 +66,3 @@ class PublicUseraApiTests(TestCase):
             email=payload['email']
         ).exists()
         self.assertFalse(user_exists)
-
-
-
-
