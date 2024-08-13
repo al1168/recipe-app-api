@@ -7,9 +7,7 @@ from django.contrib.auth import (
     )
 from django.utils.translation import gettext as _
 from rest_framework import serializers
-import logging
 
-logger = logging.getLogger(__name__)
 
 class UserSerializer(serializers.ModelSerializer):
     """Serializer for the user object."""
@@ -23,9 +21,10 @@ class UserSerializer(serializers.ModelSerializer):
         """Create and return a user with encrypted password."""
         return get_user_model().objects.create_user(**validated_data)
 
+
 class AuthTokenSerializer(serializers.Serializer):
-    """Serializer for the aitj token."""
-    email = serializers.EmailField
+    """Serializer for the auth token."""
+    email = serializers.EmailField()
     password = serializers.CharField(
         style={'input_type': 'password'},
         trim_whitespace=False,
