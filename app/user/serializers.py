@@ -21,16 +21,14 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         """Create and return a user with encrypted password."""
-        res = get_user_model().objects.create_user(**validated_data)
-        logging.debug(f'token{res}')
-        return res
+        return get_user_model().objects.create_user(**validated_data)
 
 class AuthTokenSerializer(serializers.Serializer):
     """Serializer for the aitj token."""
     email = serializers.EmailField
     password = serializers.CharField(
         style={'input_type': 'password'},
-        trim_whitespace=False
+        trim_whitespace=False,
     )
 
     def validate(self, attrs):
