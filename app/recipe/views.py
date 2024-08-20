@@ -26,4 +26,3 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return serializer.RecipeSerializer
 
         return self.serializer_class
-    
