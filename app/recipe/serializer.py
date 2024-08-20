@@ -10,9 +10,12 @@ class RecipeSerializer(ModelSerializer):
     """Serializer for Recipes"""
     class Meta:
         model = Recipe
-        fields = ['id', 'title', 'time_minutes', ]
-    # def create():
-    #     pass
+        fields = ['id', 'title', 'time_minutes', 'price', 'link']
 
-    # def update():
-    #     pass
+
+class RecipleDetailSerializer(RecipeSerializer):
+    """Serializer for recipe detail view."""
+
+    class Meta(RecipeSerializer.Meta):
+        fields = RecipeSerializer.Meta.fields + ['description']
+        
