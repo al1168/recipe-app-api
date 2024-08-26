@@ -22,10 +22,10 @@ class RecipleDetailSerializer(RecipeSerializer):
     class Meta(RecipeSerializer.Meta):
         fields = RecipeSerializer.Meta.fields + ['description']
 
+
 class TagSerializer(ModelSerializer):
     """Serialzer for tags"""
     class Meta:
         model = Tag
-        fields = ['id','name']
+        fields = ['id', 'name']
         read_only_fields = ['id']
-        

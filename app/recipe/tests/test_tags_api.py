@@ -13,15 +13,19 @@ from rest_framework.test import APIClient
 from recipe.serializer import TagSerializer
 from core.models import Tag, Recipe
 
+
 def detail_url(tag_id):
     """Create and return a tag detail url"""
-    return reverse('recipe:tag-detail',args=[tag_id])
+    return reverse('recipe:tag-detail', args=[tag_id])
+
 
 def create_user(email='user@example.com', password='password123'):
     return get_user_model().objects.create_user(email=email, password=password)
 
+
 def create_recipe(user, **params):
     """create and return a sample recipe"""
+
     defaults = {
         'title': 'Sample recipe title',
         'time_minutes': 22,
@@ -34,6 +38,7 @@ def create_recipe(user, **params):
 
     recipe = Recipe.objects.create(user=user, **defaults)
     return recipe
+
 
 def create_tag(user, tag="Example Tag"):
     """create and return a tag"""
@@ -54,6 +59,7 @@ class PublicTagApiTests(TestCase):
         """Test auth is arequired for retrieving tags."""
         res = self.client.get(TAGS_URL)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
+
 
 class PrivateTagAPiTests(TestCase):
 
@@ -93,7 +99,7 @@ class PrivateTagAPiTests(TestCase):
 
         payload = {'name': 'Dessert'}
         url = detail_url(tag.id)
-        res = self.client.patch(url,payload)
+        res = self.client.patch(url, payload)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         tag.refresh_from_db()
@@ -108,21 +114,3 @@ class PrivateTagAPiTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         tags = Tag.objects.filter(user=self.user)
         self.assertFalse(tags.exists())
-        
-
-    # add tags
-    # def test_auth_add_tag(self):
-    #     recipe = create_recipe()
-    #     new_tag = create_tag()
-    #     payload ={
-    #         "tag": new_tag,
-    #         "recipe": recipe
-    #     }
-    #     # update recipe tag
-    #     res = self.client.post(TAGS_URL, payload)
-
-    #     self.assertEqual(res.status_code, status.HTTP_200_OK)
-    #     self.assertContains(Recipe.objects.filter(id=recipe.id)["tags"], new_tag)
-    # remove tags
-
-    # update tags
