@@ -6,7 +6,16 @@ from rest_framework.serializers import ModelSerializer
 from core.models import (
     Recipe,
     Tag,
+    Ingredient
 )
+
+
+class IngredientSerializer(ModelSerializer):
+
+    class Meta:
+        model = Ingredient
+        fields = ['id', 'name']
+        read_only_fields = ['id']
 
 
 class TagSerializer(ModelSerializer):
@@ -21,15 +30,14 @@ class TagSerializer(ModelSerializer):
 class RecipeSerializer(ModelSerializer):
     """Serializer for Recipes"""
     tags = TagSerializer(many=True, required=False)
+    ingredients = IngredientSerializer(many=True, required=False)
 
     class Meta:
         model = Recipe
-        fields = ['id', 'title', 'time_minutes', 'price', 'link', 'tags']
+        fields = ['id', 'title', 'time_minutes',
+                  'price', 'link', 'tags', 'ingredients']
 
-    def create(self, validated_data):
-        """Create a recipe"""
-        tags = validated_data.pop('tags', [])
-        recipe = Recipe.objects.create(**validated_data)
+    def _get_or_create_tags(self, tags, recipe):
         auth_user = self.context['request'].user
         for tag in tags:
             tag_obj, created = Tag.objects.get_or_create(
@@ -39,8 +47,25 @@ class RecipeSerializer(ModelSerializer):
             recipe.tags.add(tag_obj)
             if created:
                 print(f"new tag {tag} was created")
-        print(recipe.__dict__)
+
+    def create(self, validated_data):
+        """Create a recipe"""
+        tags = validated_data.pop('tags', [])
+        recipe = Recipe.objects.create(**validated_data)
+        self._get_or_create_tags(tags, recipe)
         return recipe
+
+    def update(self, instance, validated_data):
+        """Update recipe."""
+        tags = validated_data.pop('tags', None)
+        if tags is not None:
+            instance.tags.clear()
+            self._get_or_create_tags(tags, instance)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        instance.save()
+        return instance
 
 
 class RecipleDetailSerializer(RecipeSerializer):

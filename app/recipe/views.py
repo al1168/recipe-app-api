@@ -52,3 +52,8 @@ class TagViewSet(mixins.ListModelMixin,
     def get_queryset(self):
         """Filter querset to authenticated user"""
         return self.queryset.filter(user=self.request.user).order_by('-name')
+
+
+class IngredientViewSet(mixins.ListModelMixin):
+    """Manage Ingredient in the database"""
+    serializer_class = serializer.IngredientSerializer
