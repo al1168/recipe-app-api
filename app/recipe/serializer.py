@@ -17,6 +17,11 @@ class IngredientSerializer(ModelSerializer):
         fields = ['id', 'name']
         read_only_fields = ['id']
 
+    def validate_name(self, value):
+        if value.strip() == '':
+            raise ValueError("Ingredient name must not be empty")
+        return value
+
 
 class TagSerializer(ModelSerializer):
     """Serialzer for tags"""
@@ -37,10 +42,11 @@ class RecipeSerializer(ModelSerializer):
         fields = ['id', 'title', 'time_minutes',
                   'price', 'link', 'tags', 'ingredients']
 
-    def _get_or_create_tags(self, tags, recipe):
+    def _get_or_create_item(self, tags, recipe, Type):
         auth_user = self.context['request'].user
+        obj = Type
         for tag in tags:
-            tag_obj, created = Tag.objects.get_or_create(
+            tag_obj, created = obj.objects.get_or_create(
                 user=auth_user,
                 **tag
             )
@@ -51,8 +57,10 @@ class RecipeSerializer(ModelSerializer):
     def create(self, validated_data):
         """Create a recipe"""
         tags = validated_data.pop('tags', [])
+        ingredients = validated_data.pop('ingredients', [])
         recipe = Recipe.objects.create(**validated_data)
-        self._get_or_create_tags(tags, recipe)
+        self._get_or_create_item(tags, recipe, Tag)
+        self._get_or_create_item(ingredients, recipe, Ingredient)
         return recipe
 
     def update(self, instance, validated_data):
@@ -60,7 +68,7 @@ class RecipeSerializer(ModelSerializer):
         tags = validated_data.pop('tags', None)
         if tags is not None:
             instance.tags.clear()
-            self._get_or_create_tags(tags, instance)
+            self._get_or_create_item(tags, instance, Tag)
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 
