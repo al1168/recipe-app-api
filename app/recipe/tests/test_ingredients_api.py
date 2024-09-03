@@ -6,6 +6,7 @@ from rest_framework import status
 from django.urls import reverse
 from django.test import TestCase
 
+from recipe.serializer import IngredientSerializer
 from core.models import Ingredient
 
 
@@ -23,8 +24,13 @@ INGREDIENT_URL = reverse('recipe:ingredient-list')
 
 class PublicIngredientApiTests(TestCase):
 
-    def test_create_ingredient(self):
-        pass
+    def setUp(self) -> None:
+        self.client = APIClient()
+
+    def test_auth_required(self):
+        """Test auth is required for retrieving ingredeints"""
+        res = self.client.get(INGREDIENT_URL)
+        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
 class PrivateIngredientApiTests(TestCase):
@@ -82,3 +88,28 @@ class PrivateIngredientApiTests(TestCase):
         ingredients = Ingredient.objects.filter(user=self.user)
 
         self.assertEqual(str(ingredients[0]), payload['name'])
+
+    def test_retrieve_ingredients_list(self):
+        """Test retreving a list of ingredients"""
+        Ingredient.objects.create(user=self.user, name="Pineapple")
+        Ingredient.objects.create(user=self.user, name="Kale")
+
+        res = self.client.get(INGREDIENT_URL)
+
+        ingredients = Ingredient.objects.all().order_by('-name')
+        serializer = IngredientSerializer(ingredients, many=True)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data, serializer.data)
+
+    def test_ingredients_limited_to_user(self):
+        other_user = create_user(email="poop@example.com", password="yayayya")
+
+        Ingredient.objects.create(user=other_user, name="Kale")
+        Ingredient.objects.create(user=self.user, name="Notkale")
+        res = self.client.get(INGREDIENT_URL)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res.data), 1)
+        ingredient = Ingredient.objects.filter(user=self.user)
+
+        serialized = IngredientSerializer(ingredient, many=True)
+        self.assertEqual(res.data, serialized.data)
