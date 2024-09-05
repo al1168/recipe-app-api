@@ -18,5 +18,10 @@ router.register('Ingredients', views.IngredientViewSet)
 app_name = 'recipe'
 
 urlpatterns = [
-    path('', include(router.urls))
+    path('', include(router.urls)),
+    path('recipes/<int:pk>/remove-ingredient/<int:ingredient_id>/',
+         views.RecipeViewSet.as_view(
+            {'delete': 'remove_ingredient'}
+            ),
+         name='remove-ingredient')
 ]

@@ -13,6 +13,7 @@ from rest_framework.test import APIClient
 from core.models import (
     Recipe,
     Tag,
+    Ingredient
 )
 
 from recipe.serializer import (
@@ -28,6 +29,11 @@ def detail_url(recipe_id):
     return reverse('recipe:recipe-detail', args=[recipe_id])
 
 
+def remove_ingredient_from_recipe_url(recipe_id, ingredient_id):
+    """create and return a url to delete ingredient from recipe """
+    return reverse('recipe:remove-ingredient', args=[recipe_id, ingredient_id])
+
+
 def create_recipe(user, **params):
     """create and return a sample recipe"""
     defaults = {
@@ -35,7 +41,7 @@ def create_recipe(user, **params):
         'time_minutes': 22,
         'price': Decimal('5.25'),
         'description': "Sample description",
-        'link': 'http://example.com/recipe.pdf'
+        'link': 'http://example.com/recipe.pdf',
     }
 
     defaults.update(params)
@@ -289,3 +295,58 @@ class PrivateRecipeAPITests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(recipe.tags.count(), 0)
+
+    def test_create_recipe_exisiting_ingredients(self):
+        ingredient_1 = Ingredient.objects.create(user=self.user, name="Beer")
+        ingredient_2 = Ingredient.objects.create(user=self.user, name="flour")
+        ingredient_3 = Ingredient.objects.create(user=self.user, name="water")
+
+        created_ingredients = [
+            str(ingredient_1), str(ingredient_2), str(ingredient_3)
+            ]
+        payload = {
+            'title': 'Fried Chicken Batter',
+            'time_minutes': 6,
+            'price': Decimal('4.50'),
+            'ingredients': [
+                {'name': 'Beer'},
+                {'name': 'flour'},
+                {'name': 'water'}
+            ]
+        }
+
+        res = self.client.post(RECIPE_URL, payload, format='json')
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        recipe_ingredients = res.data['ingredients']
+        for ingredient in recipe_ingredients:
+            self.assertIn(ingredient['name'], created_ingredients)
+
+    def test_create_recipe_with_new_ingredients(self):
+        payload = {
+            'title': 'Chicken rice',
+            'time_minutes': 699,
+            'price': Decimal('4.50'),
+            'ingredients': [{'name': 'Chicken'},
+                            {'name': 'rice'},
+                            {'name': 'water'}]
+        }
+        res = self.client.post(RECIPE_URL, payload, format='json')
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(len(res.data['ingredients']), 3)
+
+    def test_remove_ingredient_from_recipe(self):
+        """Test removing an ingredient from a recipe."""
+        recipe = create_recipe(user=self.user)
+        ingredient = Ingredient.objects.create(user=self.user,
+                                               name='bad_ingredient')
+        recipe.ingredients.add(ingredient)
+
+        url = reverse(
+            'recipe:remove-ingredient',
+            args=[recipe.id, ingredient.id]
+        )
+        res = self.client.delete(url)
+
+        self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertNotIn(ingredient, recipe.ingredients.all())

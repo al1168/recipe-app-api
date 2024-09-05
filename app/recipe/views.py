@@ -4,10 +4,12 @@ Views for recipe APIs.
 from rest_framework import (
     viewsets,
     mixins,
+    status
     )
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-
+from rest_framework.response import Response
+from rest_framework.decorators import action
 from core.models import (
     Recipe,
     Tag,
@@ -15,6 +17,7 @@ from core.models import (
 )
 
 from recipe import serializer
+from django.shortcuts import get_object_or_404
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -38,6 +41,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         """Create a new recipe"""
         serializer.save(user=self.request.user)
+
+    @action(methods=['DELETE'], detail=True)
+    def remove_ingredient(self, request, pk=None, ingredient_id=None):
+        """Remove an ingredient from a recipe."""
+        recipe = self.get_object()
+        ingredient = get_object_or_404(Ingredient, id=ingredient_id)
+        recipe.ingredients.remove(ingredient)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class TagViewSet(mixins.ListModelMixin,

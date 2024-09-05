@@ -42,17 +42,21 @@ class RecipeSerializer(ModelSerializer):
         fields = ['id', 'title', 'time_minutes',
                   'price', 'link', 'tags', 'ingredients']
 
-    def _get_or_create_item(self, tags, recipe, Type):
+    def _get_or_create_item(self, items, recipe, Type):
+        """Creates item based on passed in type and adds it to recipe """
         auth_user = self.context['request'].user
         obj = Type
-        for tag in tags:
-            tag_obj, created = obj.objects.get_or_create(
+        for item in items:
+            item_obj, created = obj.objects.get_or_create(
                 user=auth_user,
-                **tag
+                **item
             )
-            recipe.tags.add(tag_obj)
             if created:
-                print(f"new tag {tag} was created")
+                print(f"new item {item} of type {str(Type)} was created")
+            if Type == Tag:
+                recipe.tags.add(item_obj)
+            elif Type == Ingredient:
+                recipe.ingredients.add(item_obj)
 
     def create(self, validated_data):
         """Create a recipe"""
