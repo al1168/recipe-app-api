@@ -29,11 +29,6 @@ def detail_url(recipe_id):
     return reverse('recipe:recipe-detail', args=[recipe_id])
 
 
-def remove_ingredient_from_recipe_url(recipe_id, ingredient_id):
-    """create and return a url to delete ingredient from recipe """
-    return reverse('recipe:remove-ingredient', args=[recipe_id, ingredient_id])
-
-
 def create_recipe(user, **params):
     """create and return a sample recipe"""
     defaults = {
