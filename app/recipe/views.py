@@ -20,6 +20,18 @@ from recipe import serializer
 from django.shortcuts import get_object_or_404
 
 
+class BaseRecipeAttViewSet(mixins.ListModelMixin,
+                           mixins.UpdateModelMixin,
+                           mixins.DestroyModelMixin,
+                           viewsets.GenericViewSet):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """Retrieve recipes for authenticated user."""
+        return self.queryset.filter(user=self.request.user).order_by('-id')
+
+
 class RecipeViewSet(viewsets.ModelViewSet):
     """View for manage recipe APis."""
     serializer_class = serializer.RecipleDetailSerializer
@@ -42,7 +54,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         """Create a new recipe"""
         serializer.save(user=self.request.user)
 
-    @action(methods=['DELETE'], detail=True)
+    @action(methods=['PATCH'], detail=True,
+            url_path='remove-ingredient/(?P<ingredient_id>\d+)')
     def remove_ingredient(self, request, pk=None, ingredient_id=None):
         """Remove an ingredient from a recipe."""
         recipe = self.get_object()
@@ -51,35 +64,21 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class TagViewSet(mixins.ListModelMixin,
-                 mixins.UpdateModelMixin,
-                 mixins.DestroyModelMixin,
-                 viewsets.GenericViewSet):
+class TagViewSet(BaseRecipeAttViewSet):
     """Manage tags in the database."""
     serializer_class = serializer.TagSerializer
     queryset = Tag.objects.all()
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
-        """Filter querset to authenticated user"""
-        return self.queryset.filter(user=self.request.user).order_by('-name')
 
-
-class IngredientViewSet(mixins.ListModelMixin, mixins.CreateModelMixin,
-                        mixins.DestroyModelMixin, mixins.UpdateModelMixin,
-                        viewsets.GenericViewSet):
+class IngredientViewSet(mixins.CreateModelMixin, BaseRecipeAttViewSet,):
     """Manage Ingredient in the database"""
 
     serializer_class = serializer.IngredientSerializer
     queryset = Ingredient.objects.all()
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication]
-
-    def get_queryset(self):
-        """Filter querset to authenticated user"""
-
-        return self.queryset.filter(user=self.request.user).order_by('-name')
 
     def perform_create(self, serializer):
         """Create a new recipe"""

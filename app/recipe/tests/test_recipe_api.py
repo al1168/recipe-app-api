@@ -341,7 +341,7 @@ class PrivateRecipeAPITests(TestCase):
             'recipe:remove-ingredient',
             args=[recipe.id, ingredient.id]
         )
-        res = self.client.delete(url)
+        res = self.client.patch(url)
 
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         self.assertNotIn(ingredient, recipe.ingredients.all())
