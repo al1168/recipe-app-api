@@ -23,5 +23,10 @@ urlpatterns = [
          views.RecipeViewSet.as_view(
             {'patch': 'remove_ingredient'}
             ),
-         name='remove-ingredient')
+         name='remove-ingredient'),
+    path('recipes/<int:pk>/add-ingredient/<int:ingredient_id>/',
+         views.RecipeViewSet.as_view(
+            {'patch': 'add_ingredient'}
+            ),
+         name='add-ingredient')
 ]

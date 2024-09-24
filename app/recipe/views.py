@@ -55,13 +55,22 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
     @action(methods=['PATCH'], detail=True,
-            url_path='remove-ingredient/(?P<ingredient_id>\d+)')
+            url_path=r'remove-ingredient/(?P<ingredient_id>\d+)')
     def remove_ingredient(self, request, pk=None, ingredient_id=None):
         """Remove an ingredient from a recipe."""
         recipe = self.get_object()
         ingredient = get_object_or_404(Ingredient, id=ingredient_id)
         recipe.ingredients.remove(ingredient)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(methods=['PATCH'], detail=True,
+            url_path=r'add-ingredient/(?P<ingredient_id>\d+)')
+    def add_ingredient(self, request, pk=None, ingredient_id=None):
+        """Remove an ingredient from a recipe."""
+        recipe = self.get_object()
+        ingredient = get_object_or_404(Ingredient, id=ingredient_id)
+        recipe.ingredients.add(ingredient)
+        return Response(status=status.HTTP_200_OK)
 
 
 class TagViewSet(BaseRecipeAttViewSet):

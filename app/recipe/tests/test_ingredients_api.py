@@ -57,17 +57,6 @@ class PrivateIngredientApiTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(Ingredient.objects.filter(user=self.user).count(), 0)
 
-    def update_ingredient(self):
-        ingredient = Ingredient.objects.create(user=self.user,
-                                               name='Coriander')
-        payload = {'name': 'Coriander'}
-        url = detail_url(ingredient.id)
-        res = self.client.patch(url, payload)
-
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        ingredient.refresh_from_db()
-        self.assertEqual(ingredient.name, payload['name'])
-
     def test_delete_ingredient(self):
         ingredient = Ingredient.objects.create(user=self.user,
                                                name='Coriander')
@@ -113,3 +102,4 @@ class PrivateIngredientApiTests(TestCase):
 
         serialized = IngredientSerializer(ingredient, many=True)
         self.assertEqual(res.data, serialized.data)
+

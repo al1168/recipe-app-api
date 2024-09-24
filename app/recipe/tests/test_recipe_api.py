@@ -345,3 +345,16 @@ class PrivateRecipeAPITests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         self.assertNotIn(ingredient, recipe.ingredients.all())
+
+    def test_add_ingredirent_to_recipe(self):
+        """Test adding an ingredient to a recipe"""
+        recipe = create_recipe(user=self.user)
+        ingredient = Ingredient.objects.create(user=self.user,
+                                               name='new_ingrdient')
+        url = reverse(
+            'recipe:add-ingredient',
+            args=[recipe.id, ingredient.id]
+        )
+        res = self.client.patch(url)
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn(ingredient, recipe.ingredients.all())
