@@ -102,4 +102,3 @@ class PrivateIngredientApiTests(TestCase):
 
         serialized = IngredientSerializer(ingredient, many=True)
         self.assertEqual(res.data, serialized.data)
-
