@@ -15,8 +15,8 @@ from core.models import (
     Tag,
     Ingredient
 )
+from recipe import serializers
 
-from recipe import serializer
 from django.shortcuts import get_object_or_404
 
 
@@ -34,7 +34,7 @@ class BaseRecipeAttViewSet(mixins.ListModelMixin,
 
 class RecipeViewSet(viewsets.ModelViewSet):
     """View for manage recipe APis."""
-    serializer_class = serializer.RecipleDetailSerializer
+    serializer_class = serializers.RecipleDetailSerializer
     queryset = Recipe.objects.all()
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -46,9 +46,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         """Return the serializer class for request."""
         if self.action == 'list':
-            return serializer.RecipeSerializer
+            return serializers.RecipeSerializer
         elif self.action == 'upload_image':
-            return serializer.RecipeImageSerializer
+            return serializers.RecipeImageSerializer
 
         return self.serializer_class
 
@@ -66,7 +66,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
 
-        return Response(serializer.data, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(methods=['PATCH'], detail=True,
             url_path=r'remove-ingredient/(?P<ingredient_id>\d+)')
@@ -89,7 +89,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
 class TagViewSet(BaseRecipeAttViewSet):
     """Manage tags in the database."""
-    serializer_class = serializer.TagSerializer
+    serializer_class = serializers.TagSerializer
     queryset = Tag.objects.all()
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -98,7 +98,7 @@ class TagViewSet(BaseRecipeAttViewSet):
 class IngredientViewSet(mixins.CreateModelMixin, BaseRecipeAttViewSet,):
     """Manage Ingredient in the database"""
 
-    serializer_class = serializer.IngredientSerializer
+    serializer_class = serializers.IngredientSerializer
     queryset = Ingredient.objects.all()
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication]

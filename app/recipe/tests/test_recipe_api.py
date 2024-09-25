@@ -20,7 +20,7 @@ from core.models import (
     Ingredient
 )
 
-from recipe.serializer import (
+from recipe.serializers import (
     RecipeSerializer,
     RecipleDetailSerializer
 )

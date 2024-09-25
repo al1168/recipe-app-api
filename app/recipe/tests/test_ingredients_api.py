@@ -6,7 +6,7 @@ from rest_framework import status
 from django.urls import reverse
 from django.test import TestCase
 
-from recipe.serializer import IngredientSerializer
+from recipe.serializers import IngredientSerializer
 from core.models import Ingredient
 
 
