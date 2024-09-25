@@ -51,8 +51,8 @@ class RecipeSerializer(ModelSerializer):
                 user=auth_user,
                 **item
             )
-            # if created:
-                # print(f"new item {item} of type {str(Type)} was created")
+            if created:
+                print(f"new item {item} of type {str(Type)} was created")
             if Type == Tag:
                 recipe.tags.add(item_obj)
             elif Type == Ingredient:
@@ -89,7 +89,7 @@ class RecipleDetailSerializer(RecipeSerializer):
 
 class RecipeImageSerializer(ModelSerializer):
     """Serializer for uploading images to recipes."""
-    
+
     class Meta:
         model = Recipe
         fields = ['id', 'image']
