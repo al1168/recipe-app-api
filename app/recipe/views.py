@@ -27,12 +27,12 @@ from recipe import serializers
 from django.shortcuts import get_object_or_404
 
 
-@extend_schema(
+@extend_schema_view(
     list=extend_schema(
         parameters=[
             OpenApiParameter(
                 'assigned_only',
-                OpenApiTypes.Int, enum=[0, 1],
+                OpenApiTypes.INT, enum=[0, 1],
                 description="Filter by items assigned to recipes."
             ),
         ]
