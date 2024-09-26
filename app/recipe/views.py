@@ -32,7 +32,7 @@ from django.shortcuts import get_object_or_404
         parameters=[
             OpenApiParameter(
                 'assigned_only',
-                OpenApiTypes.INT, enum=[0, 1],
+                OpenApiTypes.INT, enum=[0, 1],  # 0 all 1 assigned
                 description="Filter by items assigned to recipes."
             ),
         ]

@@ -84,7 +84,9 @@ class RecipleDetailSerializer(RecipeSerializer):
     """Serializer for recipe detail view."""
 
     class Meta(RecipeSerializer.Meta):
-        fields = RecipeSerializer.Meta.fields + ['description', 'image']
+        fields = [field for field in RecipeSerializer.Meta.fields
+                  if field not in ['tags', 'ingredients']
+                  ] + ['description', 'image']
 
 
 class RecipeImageSerializer(ModelSerializer):
