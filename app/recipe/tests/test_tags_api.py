@@ -114,3 +114,49 @@ class PrivateTagAPiTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_204_NO_CONTENT)
         tags = Tag.objects.filter(user=self.user)
         self.assertFalse(tags.exists())
+
+    def test_filter_tags_assigned_to_recipes(self):
+        """Test listing tags to those assigned to recipes"""
+        tag1 = Tag.objects.create(user=self.user, name="Breakfast")
+        tag2 = Tag.objects.create(user=self.user, name="Lunch")
+        recipe = Recipe.objects.create(
+            title="Fluffy eggs on Toast",
+            time_minutes=10,
+            price=Decimal("4.14"),
+            user=self.user
+        )
+        recipe.tags.add(tag1)
+
+        res = self.client.get(TAGS_URL, {'assigned_only': 1})
+
+        ts1 = TagSerializer(tag1)
+        ts2 = TagSerializer(tag2)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn(ts1.data, res.data)
+        self.assertNotIn(ts2.data, res.data)
+
+    def test_filter_tags_unqiue(self):
+        """Test filter tags return a unique list."""
+        tag = Tag.objects.create(user=self.user, name="Breakfast")
+        Tag.objects.create(user=self.user, name="Lunch")
+        recipe1 = Recipe.objects.create(
+            title="Eggs and Bacon",
+            price=Decimal('4.12'),
+            user=self.user,
+            time_minutes=10
+        )
+        recipe2 = Recipe.objects.create(
+            title="Eggs and Steak",
+            price=Decimal('9.99'),
+            user=self.user,
+            time_minutes=12
+        )
+        recipe1.tags.add(tag)
+        recipe2.tags.add(tag)
+
+        res = self.client.get(TAGS_URL, {'assigned_only': 1})
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+        self.assertEqual(len(res.data), 1)
