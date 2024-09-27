@@ -69,10 +69,15 @@ class RecipeSerializer(ModelSerializer):
 
     def update(self, instance, validated_data):
         """Update recipe."""
+        print(validated_data)
         tags = validated_data.pop('tags', None)
+        ingredients = validated_data.pop('ingredients', None)
         if tags is not None:
             instance.tags.clear()
             self._get_or_create_item(tags, instance, Tag)
+        if ingredients is not None:
+            instance.ingredients.clear()
+            self._get_or_create_item(ingredients, instance, Ingredient)
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 
@@ -84,9 +89,7 @@ class RecipleDetailSerializer(RecipeSerializer):
     """Serializer for recipe detail view."""
 
     class Meta(RecipeSerializer.Meta):
-        fields = [field for field in RecipeSerializer.Meta.fields
-                  if field not in ['tags', 'ingredients']
-                  ] + ['description', 'image']
+        fields = RecipeSerializer.Meta.fields + ['description', 'image']
 
 
 class RecipeImageSerializer(ModelSerializer):
