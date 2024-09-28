@@ -11,14 +11,16 @@ ENV APP_PORT=9000
 
 USER root
 
-RUN mkdir -p /vol/static && \
+RUN apk add --no-cache dos2unix && \
+    mkdir -p /vol/static && \
     chmod 755 /vol/static && \
     touch /etc/nginx/conf.d/default.conf && \
     chown nginx:nginx /etc/nginx/conf.d/default.conf && \
+    dos2unix /run.sh && \
     chmod +x /run.sh
 
 VOLUME /vol/static
 
 USER nginx
 
-CMD ["/run.sh"]
+CMD ["/bin/sh", "/run.sh"]
