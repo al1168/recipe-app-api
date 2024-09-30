@@ -1,7 +1,7 @@
 #!/bin/sh
 
 set -e
-
+echo 'ALLOWED_HOSTS:' $ALLOWED_HOSTS
 python manage.py wait_for_db
 python manage.py collectstatic --noinput
 python manage.py migrate
